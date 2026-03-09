@@ -11,5 +11,7 @@ class Settings(BaseSettings):
     VK_ACCESS_TOKEN: str = ""
     VK_API_VERSION: str = "5.199"
 
+    PHOTOS_DIR: str = "photos"
+
 
 settings = Settings()
