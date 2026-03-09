@@ -6,7 +6,9 @@ import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 
 from app.main import app
+from app.core.deps import get_current_user
 from app.models.project import Project
+from app.models.user import User
 
 BASE_URL = "/api/v1/projects"
 
@@ -17,10 +19,21 @@ def make_project(id=1, name="Test", description="Desc", created_at=None) -> Proj
     return project
 
 
+def mock_user() -> User:
+    user = User()
+    user.id = 1
+    user.username = "testuser"
+    user.hashed_password = "x"
+    user.is_active = True
+    return user
+
+
 @pytest_asyncio.fixture
 async def client():
+    app.dependency_overrides[get_current_user] = mock_user
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
+    app.dependency_overrides.pop(get_current_user, None)
 
 
 # --- create ---
@@ -33,7 +46,7 @@ async def test_create_project(mock_create, client):
     response = await client.post(f"{BASE_URL}/", json={"name": "Test", "description": "Desc"})
 
     assert response.status_code == 201
-    data = response.json()
+    data = response.json()["data"]
     assert data["name"] == "Test"
     assert data["description"] == "Desc"
     mock_create.assert_called_once()
@@ -47,7 +60,7 @@ async def test_create_project_without_description(mock_create, client):
     response = await client.post(f"{BASE_URL}/", json={"name": "No desc"})
 
     assert response.status_code == 201
-    assert response.json()["description"] is None
+    assert response.json()["data"]["description"] is None
 
 
 # --- list ---
@@ -60,7 +73,7 @@ async def test_list_projects_empty(mock_list, client):
     response = await client.get(f"{BASE_URL}/")
 
     assert response.status_code == 200
-    assert response.json() == []
+    assert response.json()["data"] == []
 
 
 @pytest.mark.asyncio
@@ -71,7 +84,7 @@ async def test_list_projects(mock_list, client):
     response = await client.get(f"{BASE_URL}/")
 
     assert response.status_code == 200
-    assert len(response.json()) == 2
+    assert len(response.json()["data"]) == 2
 
 
 @pytest.mark.asyncio
@@ -126,7 +139,7 @@ async def test_get_project(mock_get, client):
     response = await client.get(f"{BASE_URL}/1")
 
     assert response.status_code == 200
-    assert response.json()["id"] == 1
+    assert response.json()["data"]["id"] == 1
 
 
 @pytest.mark.asyncio

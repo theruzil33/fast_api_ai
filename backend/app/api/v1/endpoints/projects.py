@@ -4,10 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.deps import get_current_user
 from app.schemas.project import DataResponse, ProjectCreate, ProjectResponse, ok
 from app.services import project_service
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 _VALID_SORT_FIELDS = {"name", "created_at"}
 

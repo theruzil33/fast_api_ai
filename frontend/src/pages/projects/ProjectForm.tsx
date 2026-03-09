@@ -3,25 +3,31 @@ import { Form, FormField, Label, Input, Textarea, SubmitButton, ErrorText } from
 import type { Project } from '../../types'
 
 interface ProjectFormProps {
+  token: string
+  onUnauthorized: () => void
   onAdd: (project: Project) => void
 }
 
-function ProjectForm({ onAdd }: ProjectFormProps) {
+function ProjectForm({ token, onUnauthorized, onAdd }: ProjectFormProps) {
   const [form, setForm] = useState({ name: '', description: '' })
   const [formError, setFormError] = useState<string | null>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault()
     setFormError(null)
 
     const res = await fetch('/api/v1/projects/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({ name: form.name, description: form.description || null }),
     })
 
     if (!res.ok) {
-      const json = await res.json()
+      if (res.status === 401) onUnauthorized()
+      const json = await res.json().catch(() => ({}))
       setFormError(json.error ?? `HTTP ${res.status}`)
       return
     }

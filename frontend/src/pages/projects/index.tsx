@@ -8,12 +8,27 @@ import type { Project, Filters } from '../../types'
 
 const DEFAULT_FILTERS: Filters = { name: '', sort_by: 'created_at', order: 'desc' }
 
-function Projects() {
+interface ProjectsProps {
+  token: string
+  onUnauthorized: () => void
+}
+
+function Projects({ token, onUnauthorized }: ProjectsProps) {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
+
+  const authHeaders = { Authorization: `Bearer ${token}` }
+
+  const handleApiError = async (res: Response): Promise<never> => {
+    if (res.status === 401) {
+      onUnauthorized()
+    }
+    const json = await res.json().catch(() => ({}))
+    throw new Error(json.error ?? `HTTP ${res.status}`)
+  }
 
   useEffect(() => {
     setLoading(true)
@@ -22,9 +37,9 @@ function Projects() {
     params.set('sort_by', filters.sort_by)
     params.set('order', filters.order)
 
-    fetch(`/api/v1/projects/?${params}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    fetch(`/api/v1/projects/?${params}`, { headers: authHeaders })
+      .then(async (res) => {
+        if (!res.ok) await handleApiError(res)
         return res.json()
       })
       .then((json: { data: Project[] }) => setProjects(json.data))
@@ -41,13 +56,19 @@ function Projects() {
   }
 
   const handleDelete = async () => {
-    await Promise.all(
-      [...selected].map((id) =>
-        fetch(`/api/v1/projects/${id}`, { method: 'DELETE' })
+    try {
+      await Promise.all(
+        [...selected].map((id) =>
+          fetch(`/api/v1/projects/${id}`, { method: 'DELETE', headers: authHeaders }).then(async (res) => {
+            if (!res.ok) await handleApiError(res)
+          })
+        )
       )
-    )
-    setProjects((prev) => prev.filter((p) => !selected.has(p.id)))
-    setSelected(new Set())
+      setProjects((prev) => prev.filter((p) => !selected.has(p.id)))
+      setSelected(new Set())
+    } catch (err) {
+      setError((err as Error).message)
+    }
   }
 
   return (
@@ -55,7 +76,7 @@ function Projects() {
       <h1>Projects</h1>
 
       <ActionsRow>
-        <ProjectForm onAdd={(project) => setProjects((prev) => [project, ...prev])} />
+        <ProjectForm token={token} onUnauthorized={onUnauthorized} onAdd={(project) => setProjects((prev) => [project, ...prev])} />
         <DeleteButton count={selected.size} onDelete={handleDelete} />
       </ActionsRow>
 
