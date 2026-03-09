@@ -1,16 +1,64 @@
-# React + Vite
+# Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite приложение.
 
-Currently, two official plugins are available:
+## Запуск и сборка
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Установка зависимостей
+```bash
+npm install
+```
 
-## React Compiler
+### Запуск в режиме разработки
+```bash
+npm run dev
+```
+Приложение будет доступно на `http://localhost:5173`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Сборка для продакшена
+```bash
+npm run build
+```
+Собранные файлы появятся в папке `dist/`
 
-## Expanding the ESLint configuration
+### Предпросмотр собранного приложения
+```bash
+npm run preview
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Линтинг
+```bash
+npm run lint
+```
+
+---
+
+## Структура проекта
+
+```
+frontend/
+├── public/                  # Статические файлы (отдаются как есть)
+│   └── vite.svg
+├── src/
+│   ├── main.tsx             # Точка входа — монтирует React-приложение
+│   ├── App.tsx              # Корневой компонент, роутинг
+│   ├── types.ts             # Общие TypeScript-типы
+│   ├── assets/              # Изображения и прочие ресурсы
+│   └── pages/               # Страницы приложения
+│       └── projects/        # Страница управления проектами
+│           ├── index.tsx            # Главный компонент страницы
+│           ├── index.styles.ts      # Стили (styled-components)
+│           ├── ProjectForm.tsx      # Форма создания/редактирования проекта
+│           ├── ProjectsTable.tsx    # Таблица со списком проектов
+│           ├── ProjectsFilter.tsx   # Фильтрация проектов
+│           └── DeleteButton.tsx     # Кнопка удаления проекта
+├── package.json
+├── tsconfig.json
+└── vite.config.ts
+```
+
+### Стек
+- **React 19** — UI-библиотека
+- **TypeScript** — типизация
+- **Vite** — сборщик и dev-сервер
+- **styled-components** — CSS-in-JS стили
