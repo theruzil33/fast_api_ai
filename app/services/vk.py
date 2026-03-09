@@ -5,14 +5,21 @@ from app.core.config import settings
 VK_API_BASE = "https://api.vk.com/method"
 
 
-async def fetch_all_photos(user_id: int) -> list[dict]:
-    """Выкачивает все фотографии пользователя через photos.getAll с пагинацией."""
+async def fetch_all_photos(user_id: int, limit: int | None = None) -> list[dict]:
+    """Выкачивает фотографии пользователя через photos.getAll с пагинацией.
+
+    Args:
+        user_id: ID пользователя VK.
+        limit: максимальное количество фото. None — выгрузить все.
+    """
     photos = []
     offset = 0
-    count = 200  # максимум на один запрос
+    batch = 200  # максимум на один запрос
 
     async with httpx.AsyncClient() as client:
         while True:
+            count = batch if limit is None else min(batch, limit - len(photos))
+
             response = await client.get(
                 f"{VK_API_BASE}/photos.getAll",
                 params={
@@ -38,7 +45,9 @@ async def fetch_all_photos(user_id: int) -> list[dict]:
 
             if len(photos) >= data["response"]["count"] or not items:
                 break
+            if limit is not None and len(photos) >= limit:
+                break
 
-            offset += count
+            offset += batch
 
     return photos

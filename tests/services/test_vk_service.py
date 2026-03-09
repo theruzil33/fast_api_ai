@@ -88,6 +88,34 @@ async def test_fetch_all_photos_http_error():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_fetch_all_photos_limit():
+    # Проверяет, что при limit=1 возвращается не более одного фото и делается один запрос
+    photos = [{"id": i, "owner_id": 123, "date": 0, "text": "", "sizes": []} for i in range(1, 4)]
+    respx.get(VK_URL).mock(return_value=httpx.Response(
+        200, json={"response": {"count": 3, "items": photos[:1]}}
+    ))
+
+    result = await fetch_all_photos(123, limit=1)
+
+    assert len(result) == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_fetch_all_photos_limit_larger_than_total():
+    # Проверяет, что limit больше реального количества фото не вызывает лишних запросов —
+    # возвращаются все доступные фото
+    respx.get(VK_URL).mock(return_value=httpx.Response(
+        200, json={"response": {"count": 2, "items": [PHOTO, {**PHOTO, "id": 2}]}}
+    ))
+
+    result = await fetch_all_photos(123, limit=100)
+
+    assert len(result) == 2
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_fetch_all_photos_passes_correct_params():
     # Проверяет, что в запрос передаются правильные параметры: owner_id, photo_sizes, no_service_albums
     route = respx.get(VK_URL).mock(return_value=httpx.Response(

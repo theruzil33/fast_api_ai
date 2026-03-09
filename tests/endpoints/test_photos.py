@@ -85,6 +85,33 @@ def test_get_user_photos_invalid_user_id():
     assert response.status_code == 422
 
 
+def test_get_user_photos_with_limit():
+    # Проверяет, что параметр limit передаётся в fetch_all_photos и возвращается правильное количество фото
+    mock = AsyncMock(return_value=[MOCK_PHOTO])
+    with patch("app.api.v1.endpoints.photos.fetch_all_photos", new=mock):
+        response = client.get("/api/v1/photos/123?limit=5")
+
+    assert response.status_code == 200
+    mock.assert_awaited_once_with(123, limit=5)
+
+
+def test_get_user_photos_limit_zero_invalid():
+    # Проверяет, что limit=0 не допускается (ge=1) и возвращает 422
+    with patch("app.api.v1.endpoints.photos.fetch_all_photos", new=AsyncMock(return_value=[])):
+        response = client.get("/api/v1/photos/123?limit=0")
+
+    assert response.status_code == 422
+
+
+def test_get_user_photos_without_limit():
+    # Проверяет, что без параметра limit в fetch_all_photos передаётся limit=None
+    mock = AsyncMock(return_value=[])
+    with patch("app.api.v1.endpoints.photos.fetch_all_photos", new=mock):
+        client.get("/api/v1/photos/123")
+
+    mock.assert_awaited_once_with(123, limit=None)
+
+
 def test_get_user_photos_response_schema():
     # Проверяет, что ответ содержит все обязательные поля схемы: Photo (id, owner_id, date, sizes)
     # и PhotoSize (type, url, width, height)
