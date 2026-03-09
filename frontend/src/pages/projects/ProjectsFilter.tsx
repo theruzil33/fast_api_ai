@@ -1,6 +1,12 @@
 import { FilterRow, FilterField, Label, Input, Select } from './index.styles'
+import type { Filters } from '../../types'
 
-function ProjectsFilter({ filters, onChange }) {
+interface ProjectsFilterProps {
+  filters: Filters
+  onChange: (filters: Filters) => void
+}
+
+function ProjectsFilter({ filters, onChange }: ProjectsFilterProps) {
   return (
     <FilterRow>
       <FilterField>

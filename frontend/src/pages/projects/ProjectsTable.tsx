@@ -1,6 +1,13 @@
 import { Table, Thead, Th, Tr, Td, EmptyTd } from './index.styles'
+import type { Project } from '../../types'
 
-function ProjectsTable({ projects, selected, onToggle }) {
+interface ProjectsTableProps {
+  projects: Project[]
+  selected: Set<number>
+  onToggle: (id: number) => void
+}
+
+function ProjectsTable({ projects, selected, onToggle }: ProjectsTableProps) {
   return (
     <Table>
       <Thead>

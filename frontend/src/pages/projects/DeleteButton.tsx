@@ -1,6 +1,11 @@
 import { Toolbar, DeleteButton as StyledDeleteButton } from './index.styles'
 
-function DeleteButton({ count, onDelete }) {
+interface DeleteButtonProps {
+  count: number
+  onDelete: () => void
+}
+
+function DeleteButton({ count, onDelete }: DeleteButtonProps) {
   return (
     <Toolbar>
       <StyledDeleteButton onClick={onDelete} disabled={count === 0}>

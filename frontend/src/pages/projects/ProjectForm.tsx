@@ -1,11 +1,16 @@
 import { useState } from 'react'
 import { Form, FormField, Label, Input, Textarea, SubmitButton, ErrorText } from './index.styles'
+import type { Project } from '../../types'
 
-function ProjectForm({ onAdd }) {
+interface ProjectFormProps {
+  onAdd: (project: Project) => void
+}
+
+function ProjectForm({ onAdd }: ProjectFormProps) {
   const [form, setForm] = useState({ name: '', description: '' })
-  const [formError, setFormError] = useState(null)
+  const [formError, setFormError] = useState<string | null>(null)
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setFormError(null)
 
@@ -21,7 +26,7 @@ function ProjectForm({ onAdd }) {
       return
     }
 
-    const json = await res.json()
+    const json: { data: Project } = await res.json()
     onAdd(json.data)
     setForm({ name: '', description: '' })
   }

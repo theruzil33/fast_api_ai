@@ -4,15 +4,16 @@ import ProjectForm from './ProjectForm'
 import ProjectsTable from './ProjectsTable'
 import DeleteButton from './DeleteButton'
 import ProjectsFilter from './ProjectsFilter'
+import type { Project, Filters } from '../../types'
 
-const DEFAULT_FILTERS = { name: '', sort_by: 'created_at', order: 'desc' }
+const DEFAULT_FILTERS: Filters = { name: '', sort_by: 'created_at', order: 'desc' }
 
 function Projects() {
-  const [projects, setProjects] = useState([])
+  const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [selected, setSelected] = useState(new Set())
-  const [filters, setFilters] = useState(DEFAULT_FILTERS)
+  const [error, setError] = useState<string | null>(null)
+  const [selected, setSelected] = useState<Set<number>>(new Set())
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
 
   useEffect(() => {
     setLoading(true)
@@ -26,12 +27,12 @@ function Projects() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         return res.json()
       })
-      .then((json) => setProjects(json.data))
-      .catch((err) => setError(err.message))
+      .then((json: { data: Project[] }) => setProjects(json.data))
+      .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false))
   }, [filters])
 
-  const toggleSelect = (id) => {
+  const toggleSelect = (id: number) => {
     setSelected((prev) => {
       const next = new Set(prev)
       next.has(id) ? next.delete(id) : next.add(id)
