@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.database import engine, Base
+from app.core.exception_handlers import register_exception_handlers
 import app.models  # noqa: F401 — register all models
 
 
@@ -21,5 +22,7 @@ app = FastAPI(
     debug=settings.DEBUG,
     lifespan=lifespan,
 )
+
+register_exception_handlers(app)
 
 app.include_router(api_router, prefix="/api/v1")
