@@ -31,6 +31,32 @@ npm run preview
 npm run lint
 ```
 
+### Сборка и запуск в Docker
+```bash
+docker build -t frontend .
+docker run -p 3000:80 frontend
+```
+Приложение будет доступно на `http://localhost:3000`
+
+### Запуск всего стека (frontend + backend + БД) через Docker Compose
+
+В корне проекта находится `docker-compose.full.yml`, который поднимает все сервисы сразу:
+
+```bash
+# из корня проекта
+docker compose -f docker-compose.full.yml up --build
+```
+
+| Сервис   | Адрес                   |
+|----------|-------------------------|
+| Frontend | http://localhost:3000   |
+| Backend  | http://localhost:8000   |
+
+Остановка:
+```bash
+docker compose -f docker-compose.full.yml down
+```
+
 ---
 
 ## Структура проекта
