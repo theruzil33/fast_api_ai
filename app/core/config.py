@@ -8,10 +8,7 @@ class Settings(BaseSettings):
     APP_VERSION: str = "0.1.0"
     DEBUG: bool = False
 
-    VK_ACCESS_TOKEN: str = ""
-    VK_API_VERSION: str = "5.199"
-
-    PHOTOS_DIR: str = "photos"
+    DATABASE_URL: str = "postgresql+asyncpg://user:password@localhost:5432/dbname"
 
 
 settings = Settings()

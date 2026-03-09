@@ -14,6 +14,16 @@ uvicorn app.main:app --reload
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
 
+Запустить тесты:
+```bash
+.venv/bin/pytest tests/ -v
+```
+
+Запустить конкретный файл:
+```bash
+.venv/bin/pytest tests/test_my_feature.py -v
+```
+
 ---
 
 ## Структура проекта
